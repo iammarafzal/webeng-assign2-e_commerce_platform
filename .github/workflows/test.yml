@@ -2,9 +2,9 @@ name: Integration Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   test:
@@ -40,8 +40,9 @@ jobs:
 
     - name: Wait for PostgreSQL
       run: |
-        npm install -g pg-isready
-        npx pg-isready -h localhost -p 5432 -U postgres
+        until pg_isready -h localhost -p 5432 -U postgres; do
+          sleep 1
+        done
 
     - name: Run tests
       run: npm test
@@ -52,11 +53,3 @@ jobs:
         DB_PASSWORD: postgres
         DB_NAME: ecommerce
         NODE_ENV: test
-
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: coverage/
-        retention-days: 30
